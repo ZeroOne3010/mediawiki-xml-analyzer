@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer.domain;
+package zeroone3010.mediawiki.xmlanalyzer.domain;
 
 public final class ArticleTitle {
 

@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer;
+package zeroone3010.mediawiki.xmlanalyzer;
 
 import static java.util.Comparator.comparing;
 
@@ -17,11 +17,11 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
 
-import zeroone3010.mediawiki_xml_analyzer.collectors.CumulativeArticlesCollector;
-import zeroone3010.mediawiki_xml_analyzer.collectors.CumulativeEditsCollector;
-import zeroone3010.mediawiki_xml_analyzer.domain.AnalysisResult;
-import zeroone3010.mediawiki_xml_analyzer.domain.DailyDataPoints;
-import zeroone3010.mediawiki_xml_analyzer.domain.Revision;
+import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeArticlesCollector;
+import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeEditsCollector;
+import zeroone3010.mediawiki.xmlanalyzer.domain.AnalysisResult;
+import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
 
 public final class MediaWikiXmlAnalyzer {
     private static final Logger logger = Logger.getLogger("MediaWikiXmlAnalyzer");

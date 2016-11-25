@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer.collectors;
+package zeroone3010.mediawiki.xmlanalyzer.collectors;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,9 +17,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import zeroone3010.mediawiki_xml_analyzer.domain.ArticleTitle;
-import zeroone3010.mediawiki_xml_analyzer.domain.DailyDataPoints;
-import zeroone3010.mediawiki_xml_analyzer.domain.Revision;
+import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
+import zeroone3010.mediawiki.xmlanalyzer.domain.ArticleTitle;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
 
 public class CumulativeArticlesCollector implements
         Collector<Revision, SortedMap<LocalDate, Map<String, Long>>, List<DailyDataPoints>> {

@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer.domain;
+package zeroone3010.mediawiki.xmlanalyzer.domain;
 
 import java.time.LocalDate;
 import java.util.Map;

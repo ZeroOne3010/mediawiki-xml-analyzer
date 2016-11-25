@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer;
+package zeroone3010.mediawiki.xmlanalyzer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -18,8 +18,8 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import zeroone3010.mediawiki_xml_analyzer.domain.DailyDataPoints;
-import zeroone3010.mediawiki_xml_analyzer.domain.Revision;
+import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
 
 @RunWith(Enclosed.class)
 public class MediaWikiXmlAnalyzerTest {

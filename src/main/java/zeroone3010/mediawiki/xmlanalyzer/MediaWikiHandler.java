@@ -1,4 +1,4 @@
-package zeroone3010.mediawiki_xml_analyzer;
+package zeroone3010.mediawiki.xmlanalyzer;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -13,8 +13,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import zeroone3010.mediawiki_xml_analyzer.domain.Revision;
-import zeroone3010.mediawiki_xml_analyzer.domain.Revision.Builder;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision.Builder;
 
 public final class MediaWikiHandler extends DefaultHandler {
     private List<Revision> revisions = new LinkedList<>();

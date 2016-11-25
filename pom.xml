@@ -39,7 +39,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>zeroone3010.mediawiki_xml_analyzer.MediaWikiXmlAnalyzer</mainClass>
+							<mainClass>zeroone3010.mediawiki.xmlanalyzer.MediaWikiXmlAnalyzer</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
