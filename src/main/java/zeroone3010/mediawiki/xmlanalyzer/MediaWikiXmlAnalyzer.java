@@ -1,9 +1,21 @@
 package zeroone3010.mediawiki.xmlanalyzer;
 
-import static java.util.Comparator.comparing;
+import org.xml.sax.InputSource;
+import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeArticlesCollector;
+import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeEditsCollector;
+import zeroone3010.mediawiki.xmlanalyzer.domain.AnalysisResult;
+import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -12,21 +24,13 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.InputSource;
-
-import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeArticlesCollector;
-import zeroone3010.mediawiki.xmlanalyzer.collectors.CumulativeEditsCollector;
-import zeroone3010.mediawiki.xmlanalyzer.domain.AnalysisResult;
-import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
-import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 public final class MediaWikiXmlAnalyzer {
     private static final Logger logger = Logger.getLogger("MediaWikiXmlAnalyzer");
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         final MediaWikiXmlAnalyzer analyzer = new MediaWikiXmlAnalyzer();
 
         if (System.getProperty("file") == null) {
@@ -34,7 +38,33 @@ public final class MediaWikiXmlAnalyzer {
             System.exit(1);
         }
         logger.info("Started...");
-        analyzer.analyze(new File(System.getProperty("file")));
+        final File inputFile = new File(System.getProperty("file"));
+        final AnalysisResult analysisResult = analyzer.analyze(inputFile);
+
+        final List<String> articleCounts = new ArrayList<>();
+        articleCounts.add("Date\tMain\tFile\tRedirect");
+        articleCounts.addAll(analysisResult.getArticleCounts().stream()
+                .map(c -> {
+                    final Long countMain = Optional.ofNullable(c.getDataPoints().get("Main")).orElse(0L);
+                    final Long countFile = Optional.ofNullable(c.getDataPoints().get("File")).orElse(0L);
+                    final Long countRedir = Optional.ofNullable(c.getDataPoints().get("Redirect")).orElse(0L);
+                    return String.format("%s\t%s\t%s\t%s", c.getDate(), countMain, countFile, countRedir);
+                })
+                .collect(toList()));
+        final Path articleCountsPath = Files.write(Paths.get("articleCounts.tsv"), articleCounts);
+        logger.info("Saved '" + articleCountsPath.toString() + "'.");
+
+        final List<String> userTypeCounts = new ArrayList<>();
+        userTypeCounts.add("Date\tRegistered\tAnonymous");
+        userTypeCounts.addAll(analysisResult.getEditsByUserType().stream()
+                .map(c -> {
+                    final Long countRegistered = Optional.ofNullable(c.getDataPoints().get("registered")).orElse(0l);
+                    final Long countAnonymous = Optional.ofNullable(c.getDataPoints().get("anonymous")).orElse(0l);
+                    return String.format("%s\t%s\t%s", c.getDate(), countRegistered, countAnonymous);
+                })
+                .collect(toList()));
+        final Path userTypeCountsPath = Files.write(Paths.get("userTypeCounts.tsv"), userTypeCounts);
+        logger.info("Saved '" + userTypeCountsPath.toString() + "'.");
     }
 
     AnalysisResult analyze(final File file) {
@@ -61,13 +91,6 @@ public final class MediaWikiXmlAnalyzer {
                             }
                             return "registered";
                         }, Entry::getValue, (a, b) -> a + b)))).collect(Collectors.toList());
-
-        cumulativeArticleCounts.stream().forEach(ddp -> {
-            final Long countMain = Optional.ofNullable(ddp.getDataPoints().get("Main")).orElse(0l);
-            final Long countFile = Optional.ofNullable(ddp.getDataPoints().get("File")).orElse(0l);
-            final Long countRedir = Optional.ofNullable(ddp.getDataPoints().get("Redirect")).orElse(0l);
-            System.out.printf("%s\t%s\t%s\t%s\n", ddp.getDate(), countMain, countFile, countRedir);
-        });
 
         return new AnalysisResult(cumulativeArticleCounts, cumulativeEditsByUserType, cumulativeEditsPerDay);
     }
