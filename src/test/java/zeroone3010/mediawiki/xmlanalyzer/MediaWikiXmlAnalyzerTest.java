@@ -1,25 +1,25 @@
 package zeroone3010.mediawiki.xmlanalyzer;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
+import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-
-import zeroone3010.mediawiki.xmlanalyzer.domain.DailyDataPoints;
-import zeroone3010.mediawiki.xmlanalyzer.domain.Revision;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
 public class MediaWikiXmlAnalyzerTest {
@@ -160,6 +160,29 @@ public class MediaWikiXmlAnalyzerTest {
             final List<DailyDataPoints> actual = analyzer
                     .analyze(twoUserRevisions).getArticleCounts();
             
+            assertThat(actual, equalTo(expected));
+        }
+    }
+
+    public static class BuildTsvDocumentLines extends Base {
+        @Test
+        public void one_data_set_but_three_columns() {
+            final List<DailyDataPoints> dataPoints = new ArrayList<>();
+            dataPoints.add(buildDailyDataPoints(DATE1, MAIN_NAMESPACE, 1L));
+            dataPoints.add(buildDailyDataPoints(DATE2, MAIN_NAMESPACE, 2L));
+            dataPoints.add(buildDailyDataPoints(DATE3, MAIN_NAMESPACE, 3L));
+            dataPoints.add(buildDailyDataPoints(DATE4, MAIN_NAMESPACE, 4L));
+            dataPoints.add(buildDailyDataPoints(DATE5, MAIN_NAMESPACE, 4L));
+
+            final List<String> expected = Arrays.asList("Date\tMain\tFile\tRedirect",
+                    DATE1 + "\t1\t0\t0",
+                    DATE2 + "\t2\t0\t0",
+                    DATE3 + "\t3\t0\t0",
+                    DATE4 + "\t4\t0\t0",
+                    DATE5 + "\t4\t0\t0");
+
+            final List<String> actual = analyzer.buildTsvDocumentLines(dataPoints, Arrays.asList("Main", "File", "Redirect"));
+
             assertThat(actual, equalTo(expected));
         }
     }

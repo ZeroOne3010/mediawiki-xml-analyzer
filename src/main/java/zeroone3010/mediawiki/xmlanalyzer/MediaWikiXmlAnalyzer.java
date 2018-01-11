@@ -42,14 +42,20 @@ public final class MediaWikiXmlAnalyzer {
         final File inputFile = new File(System.getProperty("file"));
         final AnalysisResult analysisResult = analyzer.analyze(inputFile);
 
-        analyzer.writeToFile("articleCounts.tsv", analysisResult.getArticleCounts(),
-                Arrays.asList("Main", "File", "Redirect"));
+        final List<String> articleCountsDocumentLines = analyzer.buildTsvDocumentLines(
+                analysisResult.getArticleCounts(), Arrays.asList("Main", "File", "Redirect"));
+        analyzer.writeToFile("articleCounts.tsv", articleCountsDocumentLines);
 
-        analyzer.writeToFile("userTypeCounts.tsv", analysisResult.getEditsByUserType(),
-                Arrays.asList("registered", "anonymous"));
+        final List<String> userTypeCountsDocumentLines = analyzer.buildTsvDocumentLines(
+                analysisResult.getArticleCounts(), Arrays.asList("Main", "File", "Redirect"));
+        analyzer.writeToFile("userTypeCounts.tsv", userTypeCountsDocumentLines);
     }
 
-    private void writeToFile(final String fileName, final List<DailyDataPoints> dataPoints, final List<String> fields) {
+    /**
+     * Builds a list of tab-separated values (tsv).
+     */
+    List<String> buildTsvDocumentLines(final List<DailyDataPoints> dataPoints,
+                                       final List<String> fields) {
         final List<String> counts = new ArrayList<>();
         final List<String> fieldNames = new ArrayList<>();
         fieldNames.add("Date");
@@ -62,10 +68,13 @@ public final class MediaWikiXmlAnalyzer {
                                 .map(field -> d.getDataPoints().getOrDefault(field, 0L))
                                 .map(String::valueOf)
                                 .collect(joining("\t")))
-                .collect(toList()));
+                        .collect(toList()));
+        return counts;
+    }
 
+    private void writeToFile(final String fileName, final List<String> lines) {
         try {
-            final Path outputPath = Files.write(Paths.get(fileName), counts);
+            final Path outputPath = Files.write(Paths.get(fileName), lines);
             logger.info("Saved '" + outputPath.toString() + "'.");
         } catch (final IOException e) {
             e.printStackTrace();
