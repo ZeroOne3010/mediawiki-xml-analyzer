@@ -16,15 +16,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public final class MediaWikiXmlAnalyzer {
@@ -41,30 +42,34 @@ public final class MediaWikiXmlAnalyzer {
         final File inputFile = new File(System.getProperty("file"));
         final AnalysisResult analysisResult = analyzer.analyze(inputFile);
 
-        final List<String> articleCounts = new ArrayList<>();
-        articleCounts.add("Date\tMain\tFile\tRedirect");
-        articleCounts.addAll(analysisResult.getArticleCounts().stream()
-                .map(c -> {
-                    final Long countMain = Optional.ofNullable(c.getDataPoints().get("Main")).orElse(0L);
-                    final Long countFile = Optional.ofNullable(c.getDataPoints().get("File")).orElse(0L);
-                    final Long countRedir = Optional.ofNullable(c.getDataPoints().get("Redirect")).orElse(0L);
-                    return String.format("%s\t%s\t%s\t%s", c.getDate(), countMain, countFile, countRedir);
-                })
-                .collect(toList()));
-        final Path articleCountsPath = Files.write(Paths.get("articleCounts.tsv"), articleCounts);
-        logger.info("Saved '" + articleCountsPath.toString() + "'.");
+        analyzer.writeToFile("articleCounts.tsv", analysisResult.getArticleCounts(),
+                Arrays.asList("Main", "File", "Redirect"));
 
-        final List<String> userTypeCounts = new ArrayList<>();
-        userTypeCounts.add("Date\tRegistered\tAnonymous");
-        userTypeCounts.addAll(analysisResult.getEditsByUserType().stream()
-                .map(c -> {
-                    final Long countRegistered = Optional.ofNullable(c.getDataPoints().get("registered")).orElse(0l);
-                    final Long countAnonymous = Optional.ofNullable(c.getDataPoints().get("anonymous")).orElse(0l);
-                    return String.format("%s\t%s\t%s", c.getDate(), countRegistered, countAnonymous);
-                })
+        analyzer.writeToFile("userTypeCounts.tsv", analysisResult.getEditsByUserType(),
+                Arrays.asList("registered", "anonymous"));
+    }
+
+    private void writeToFile(final String fileName, final List<DailyDataPoints> dataPoints, final List<String> fields) {
+        final List<String> counts = new ArrayList<>();
+        final List<String> fieldNames = new ArrayList<>();
+        fieldNames.add("Date");
+        fieldNames.addAll(fields);
+        counts.add(fieldNames.stream().collect(joining("\t")));
+        counts.addAll(
+                dataPoints.stream()
+                        .map(d -> d.getDate() + "\t"
+                                + fields.stream()
+                                .map(field -> d.getDataPoints().getOrDefault(field, 0L))
+                                .map(String::valueOf)
+                                .collect(joining("\t")))
                 .collect(toList()));
-        final Path userTypeCountsPath = Files.write(Paths.get("userTypeCounts.tsv"), userTypeCounts);
-        logger.info("Saved '" + userTypeCountsPath.toString() + "'.");
+
+        try {
+            final Path outputPath = Files.write(Paths.get(fileName), counts);
+            logger.info("Saved '" + outputPath.toString() + "'.");
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 
     AnalysisResult analyze(final File file) {
